@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sahaya - Illiterate-Friendly Library Kiosk (clickable demo)</title>
+<style>
+  :root { --blue:#2a4bc8; --lblue:#e8eefc; --bord:#9db0e6; --text:#111827; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:#e5e7eb; font-family:Arial,Helvetica,sans-serif; color:var(--text); display:flex; justify-content:center; padding:16px; }
+  .kiosk { width:100%; max-width:380px; min-height:640px; background:#fff; border:2px solid #b8c0d8; border-radius:20px; padding:12px; display:flex; flex-direction:column; }
+  .bar { background:var(--blue); color:#fff; font-weight:bold; font-size:13px; padding:14px; border-radius:10px; }
+  h1 { font-size:24px; margin:18px 6px 2px; }
+  .sub { font-size:12px; color:#6b7280; margin:0 6px 16px; }
+  .main { flex:1; padding:0 4px; }
+  .tile { display:flex; align-items:center; gap:12px; width:100%; min-height:64px; margin-bottom:12px; padding:10px 14px; background:var(--lblue); border:1.5px solid var(--bord); border-radius:12px; font-size:16px; font-weight:bold; color:var(--text); text-align:left; cursor:pointer; }
+  .tile:active { background:#d3defa; }
+  .tile .ic { width:34px; height:34px; border-radius:50%; border:2px solid var(--blue); background:#fff; display:flex; align-items:center; justify-content:center; font-size:16px; color:var(--blue); flex:none; }
+  .tile .sp { margin-left:auto; color:var(--blue); font-size:16px; }
+  .cardbox { border:3px solid var(--blue); border-radius:16px; padding:36px 20px; text-align:center; cursor:pointer; }
+  .card { width:190px; height:118px; margin:0 auto 18px; background:var(--lblue); border:3px solid var(--blue); border-radius:10px; position:relative; }
+  .card:before { content:""; position:absolute; left:10px; top:12px; width:28px; height:30px; background:#a9c0f5; }
+  .card:after { content:""; position:absolute; left:50px; top:14px; width:120px; height:3px; background:var(--blue); box-shadow:0 14px 0 var(--blue), 0 28px 0 var(--blue); }
+  .lbl { color:var(--blue); font-weight:bold; }
+  .tick { width:84px; height:84px; margin:26px auto 10px; border-radius:50%; border:3px solid #3f8f5b; background:#e6f4ea; color:#2f7d4b; font-size:48px; display:flex; align-items:center; justify-content:center; }
+  .note { margin:14px 0; padding:14px; border-radius:10px; font-size:14px; font-weight:bold; text-align:center; }
+  .ok { background:#e6f4ea; border:1.5px solid #3f8f5b; color:#2f7d4b; }
+  .warn { background:#fbf1cf; border:2px solid #e0a23a; text-align:left; }
+  .grey { background:#eef0f6; border:1.5px solid #a9b0c4; text-align:left; }
+  .nav { display:flex; gap:8px; margin-top:10px; }
+  .nav button { flex:1; min-height:46px; background:var(--lblue); border:1.5px solid var(--bord); border-radius:10px; font-size:14px; font-weight:bold; color:#1f2937; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="kiosk">
+  <div class="bar">LIBRARY HELP KIOSK</div>
+  <div id="screen" class="main"></div>
+  <div class="nav">
+    <button id="back">Back</button>
+    <button id="repeat">Repeat</button>
+    <button id="help">Help</button>
+  </div>
+</div>
+<script>
+// Each screen: title, subtitle, spoken text, and either tiles, a card scan, a result or help.
+var S = {
+  home:   { t:"What do you need?", s:"Touch a picture. Listen to the voice.", say:"What do you need? Choose eligibility, track application, or get a document.",
+            tiles:[["\u25CF","Eligibility","services"],["\u25A4","Track application","scan:status"],["\u25A4","Get a document","docs"]] },
+  services:{ t:"Choose a service", s:"The kiosk will speak each option.", say:"Choose a service. Food support, health support, or housing support.",
+            tiles:[["\u25AF","Food support","scan:eligible"],["+","Health support","scan:eligible"],["\u2302","Housing support","scan:eligible"]] },
+  docs:   { t:"Select a document", s:"Touch the document you need.", say:"Select a document. Aadhaar card, income certificate, or residence certificate.",
+            tiles:[["\u25A4","Aadhaar card","scan:receipt"],["\u25A4","Income certificate","scan:receipt"],["\u25A4","Residence certificate","scan:receipt"]] },
+  help:   { t:"Need help?", s:"You can ask for help at any time.", say:"Need help? You can repeat the voice, call library staff, or end the session.", help:true }
+};
+var RESULTS = {
+  eligible:{ t:"You may be eligible", s:"This is an example result screen.", say:"You may be eligible. Next step: ask staff to help apply.", note:"Ask staff to help apply", head:"Next step" },
+  status:  { t:"Application status", s:"This is an example result screen.", say:"Your application is being checked. Please come back later.", note:"Being checked", head:"Status" },
+  receipt: { t:"Request successful", s:"Please collect your receipt.", say:"Your request is successful. Please collect your receipt.", note:"Collect your receipt", head:"Done" }
+};
+var history = [], current = "home";
+var el = document.getElementById("screen");
+
+function speak(text) {
+  if (!("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+  var u = new SpeechSynthesisUtterance(text); u.lang = "en-IN"; u.rate = 0.9;
+  window.speechSynthesis.speak(u);
+}
+function go(key, push) {
+  if (push !== false) history.push(current);
+  current = key; render();
+}
+function render() {
+  var h = "", say = "";
+  if (current.indexOf("scan:") === 0) {
+    say = "Show your card. Place your card inside the marked area.";
+    h = '<h1>Show your card</h1><p class="sub">Place your card inside the marked area.</p>' +
+        '<div class="cardbox" id="scanbox"><div class="card"></div><div class="lbl">CARD / QR</div><p class="lbl">\uD83D\uDD0A Touch here to scan</p></div>';
+  } else if (current.indexOf("result:") === 0) {
+    var r = RESULTS[current.split(":")[1]]; say = r.say;
+    h = '<h1>' + r.t + '</h1><p class="sub">' + r.s + '</p><div class="tick">\u2713</div><p style="text-align:center;font-weight:bold">' + r.head + '</p><div class="note ok">' + r.note + '</div>' +
+        '<button class="tile" id="finish"><span class="ic">\u2302</span>End session<span class="sp">\uD83D\uDD0A</span></button>';
+  } else {
+    var s = S[current]; say = s.say;
+    h = '<h1>' + s.t + '</h1><p class="sub">' + s.s + '</p>';
+    if (s.help) {
+      h += '<div class="note warn">Let us try again.</div><button class="tile" id="rep2"><span class="sp" style="margin:0">\uD83D\uDD0A</span>Repeat the voice</button><button class="tile" id="staff" style="background:#eef0f6;border-color:#a9b0c4">Call library staff</button><button class="tile" id="finish"><span class="ic">\u2302</span>End session</button>';
+    } else {
+      s.tiles.forEach(function (x, i) { h += '<button class="tile" data-i="' + i + '"><span class="ic">' + x[0] + '</span>' + x[1] + '<span class="sp">\uD83D\uDD0A</span></button>'; });
+    }
+  }
+  el.innerHTML = h; el.dataset.say = say;
+  var tiles = el.querySelectorAll("[data-i]");
+  tiles.forEach(function (b) { b.onclick = function () { var x = S[current].tiles[b.dataset.i]; speak(x[1]); setTimeout(function () { nav(x[2]); }, 700); }; });
+  var sb = document.getElementById("scanbox");
+  if (sb) sb.onclick = function () { var kind = current.split(":")[1]; go("result:" + kind); };
+  var fin = document.getElementById("finish"); if (fin) fin.onclick = function () { history = []; current = "home"; render(); };
+  var rep2 = document.getElementById("rep2"); if (rep2) rep2.onclick = function () { speak(say); };
+  var st = document.getElementById("staff"); if (st) st.onclick = function () { speak("Calling library staff. Please wait."); alert("A library staff member has been called."); };
+  speak(say);
+}
+function nav(target) { if (target.indexOf("scan:") === 0) go(target); else go(target); }
+document.getElementById("back").onclick = function () { if (history.length) go(history.pop(), false); };
+document.getElementById("repeat").onclick = function () { speak(el.dataset.say); };
+document.getElementById("help").onclick = function () { if (current !== "help") go("help"); };
+render();
+</script>
+</body>
+</html>
