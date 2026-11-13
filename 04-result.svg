@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="600" viewBox="0 0 300 600">
+<title>04-result</title>
+<rect width="300" height="600" fill="#fff"/>
+<rect x="1" y="1" width="298" height="598" rx="18" fill="#fff" stroke="#B8C0D8" stroke-width="2"/>
+<rect x="12" y="12" width="276" height="44" rx="8" fill="#2A4BC8"/>
+<text x="24" y="40" font-size="12" font-weight="bold" fill="#fff" text-anchor="start" font-family="Arial, Helvetica, sans-serif" >LIBRARY HELP KIOSK</text>
+<text x="22" y="92" font-size="22" font-weight="bold" fill="#111827" text-anchor="start" font-family="Arial, Helvetica, sans-serif" >You may be eligible</text>
+<text x="22" y="110" font-size="10.5" font-weight="normal" fill="#6B7280" text-anchor="start" font-family="Arial, Helvetica, sans-serif" >This is an example result screen.</text>
+<circle cx="150" cy="215" r="40" fill="#E6F4EA" stroke="#3F8F5B" stroke-width="3"/><path d="M132 215 L146 230 L170 200" fill="none" stroke="#2F7D4B" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><text x="150" y="296" font-size="14" font-weight="bold" fill="#111827" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" >Next step</text><rect x="20" y="316" width="260" height="52" rx="8" fill="#E6F4EA" stroke="#3F8F5B" stroke-width="1.5"/><text x="150" y="347" font-size="12" font-weight="bold" fill="#2F7D4B" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" >Ask staff to help apply</text><g transform="translate(140 410) scale(0.9)" fill="#2A4BC8" stroke="#2A4BC8"><path d="M0 -4 H5 L10 -9 V9 L5 4 H0 Z" stroke="none"/><path d="M13 -5 Q17 0 13 5" fill="none" stroke-width="2" stroke-linecap="round"/><path d="M16 -9 Q23 0 16 9" fill="none" stroke-width="2" stroke-linecap="round"/></g>
+<rect x="12" y="548" width="85" height="34" rx="9" fill="#E8EEFC" stroke="#9DB0E6" stroke-width="1.5"/>
+<text x="54.5" y="569" font-size="12" font-weight="bold" fill="#1F2937" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" >Back</text>
+<rect x="103" y="548" width="85" height="34" rx="9" fill="#E8EEFC" stroke="#9DB0E6" stroke-width="1.5"/>
+<text x="145.5" y="569" font-size="12" font-weight="bold" fill="#1F2937" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" >Repeat</text>
+<rect x="194" y="548" width="85" height="34" rx="9" fill="#E8EEFC" stroke="#9DB0E6" stroke-width="1.5"/>
+<text x="236.5" y="569" font-size="12" font-weight="bold" fill="#1F2937" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" >Help</text>
+</svg>
